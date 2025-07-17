@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Download, Sparkles, Code, RefreshCw, Wand2, Palette, Star, Zap, Award, Settings } from 'lucide-react';
+import { Download, Sparkles, Code, RefreshCw, Wand2, Palette, Star, Zap, Award } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface CertificateDesign {
@@ -397,7 +397,7 @@ export default function CertificateGenerator({ onGenerate }: CertificateGenerato
     });
   };
 
-  const drawCreativeShapes = (ctx: CanvasRenderingContext2D, colors: any) => {
+  const drawCreativeShapes = (ctx: CanvasRenderingContext2D, colors: { primary: string; secondary: string; accent: string }) => {
     const shapes = [
       { type: 'circle', x: 120, y: 120, size: 35 },
       { type: 'circle', x: 680, y: 480, size: 30 },

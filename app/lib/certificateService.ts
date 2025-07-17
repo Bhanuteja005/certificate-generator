@@ -53,8 +53,9 @@ const generateCertificateDesigns = async (category: string): Promise<Certificate
     try {
       // Try gemini-1.5-flash first
       result = await model.generateContent(prompt);
-    } catch (error: any) {
-      if (error.message?.includes('not found') || error.message?.includes('404')) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('not found') || errorMessage.includes('404')) {
         // Try gemini-1.5-pro as fallback
         const altModel = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
         result = await altModel.generateContent(prompt);
@@ -78,7 +79,12 @@ const generateCertificateDesigns = async (category: string): Promise<Certificate
     }
 
     const parsedResponse = JSON.parse(jsonContent);
-    const designs = parsedResponse.designs.map((design: any, index: number) => ({
+    const designs = parsedResponse.designs.map((design: {
+      title: string;
+      description: string;
+      colors: { primary: string; secondary: string; accent: string; text: string };
+      style: 'modern' | 'elegant' | 'creative' | 'professional' | 'minimalist';
+    }, index: number) => ({
       ...design,
       id: index + 1,
       canvasCode: generateCanvasCode(design, category)
@@ -92,7 +98,11 @@ const generateCertificateDesigns = async (category: string): Promise<Certificate
   }
 };
 
-const generateCanvasCode = (design: any, category: string): string => {
+const generateCanvasCode = (design: {
+  title: string;
+  colors: { primary: string; secondary: string; accent: string; text: string };
+  style: string;
+}, category: string): string => {
   const styleFunction = getStyleFunctionName(design.style);
   
   return `// ${design.title} - Canvas.js Implementation

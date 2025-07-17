@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Download, Sparkles, Code, RefreshCw, Wand2, Palette, Star, Zap, Award, Settings } from 'lucide-react';
+import { Download, Sparkles, Code, RefreshCw, Wand2, Palette, Star, Zap, Award } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface CertificateDesign {
@@ -385,7 +385,11 @@ export default function CertificateGenerator({ onGenerate }: CertificateGenerato
     ctx.strokeStyle = '#a855f7';
     ctx.lineWidth = 8;
     ctx.beginPath();
-    ctx.roundRect ? ctx.roundRect(40, 40, 1120, 770, 30) : ctx.rect(40, 40, 1120, 770);
+    if (ctx.roundRect) {
+      ctx.roundRect(40, 40, 1120, 770, 30);
+    } else {
+      ctx.rect(40, 40, 1120, 770);
+    }
     ctx.stroke();
 
     // Inner creative border with dashed style
@@ -759,7 +763,7 @@ export default function CertificateGenerator({ onGenerate }: CertificateGenerato
     });
   };
 
-  const drawCreativeShapes = (ctx: CanvasRenderingContext2D, colors: any) => {
+  const drawCreativeShapes = (ctx: CanvasRenderingContext2D, colors: { primary: string; secondary: string; accent: string }) => {
     const shapes = [
       { type: 'circle', x: 180, y: 180, size: 45 },
       { type: 'circle', x: 1020, y: 670, size: 40 },
