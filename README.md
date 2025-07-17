@@ -1,54 +1,101 @@
-# Certificate Generator
+# 🎓 CertifyAI - AI-Powered Certificate Generator
 
-A modern web application that generates beautiful certificates using Canvas.js and Gemini AI API.
+> Generate stunning professional certificates with the power of AI using Next.js 15, Gemini AI, and Canvas.js
 
-## Features
+## ✨ Features
 
-- 🎨 Generate 5 unique certificate designs for any category
-- 🤖 AI-powered design suggestions using Google's Gemini AI
-- 🎯 Multiple design styles: Modern, Elegant, Creative, Professional, Minimalist
-- 🖼️ Real-time canvas rendering
-- 💾 Download certificates as PNG images
-- 🔧 View and copy Canvas.js code for each design
-- 📱 Responsive design
+- 🤖 **AI-Powered Generation** - Uses Google Gemini AI to create unique designs
+- 🎨 **5 Professional Styles** - Modern, Elegant, Creative, Professional, Minimalist
+- � **Responsive Design** - Beautiful white/blue theme that works on all devices
+- 🖼️ **High-Quality Output** - Canvas.js rendering with downloadable PNG files
+- � **Code Export** - View and copy the Canvas.js code for each design
+- ⚡ **Real-time Preview** - Instant certificate generation and preview
+- 🔄 **Visual Feedback** - Copy confirmation and loading animations
 
-## Getting Started
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15, TypeScript, Tailwind CSS
+- **AI**: Google Gemini AI (gemini-1.5-flash)
+- **Animation**: Framer Motion
+- **Graphics**: HTML5 Canvas API
+- **Icons**: Lucide React
+- **Styling**: Tailwind CSS with custom gradients
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18.x or higher
+- Node.js 18+ 
 - npm or yarn
-- Google Gemini AI API key
+- Google AI API Key
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd certificate-generator
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Bhanuteja005/certificate-generator.git
+   cd certificate-generator
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-3. Set up environment variables:
-```bash
-cp .env.example .env.local
-```
+3. **Set up environment variables**
+   ```bash
+   # Create .env.local file
+   echo "GOOGLE_AI_API_KEY=your_gemini_api_key_here" > .env.local
+   ```
 
-4. Add your Gemini AI API key to `.env.local`:
-```
-GEMINI_API_KEY=your_gemini_api_key_here
-```
+4. **Get your Google AI API Key**
+   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create a new API key
+   - Add it to your `.env.local` file
 
-### Development
+5. **Run the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-Run the development server:
-```bash
-npm run dev
-```
+6. **Open your browser**
+   ```
+   Navigate to http://localhost:3000
+   ```
+
+## 📖 How It Works
+
+### 1. User Input
+Users enter a certificate category (e.g., "Summer Code Camp Certificate")
+
+### 2. AI Generation
+- Request sent to `/api/generate-certificates`
+- Gemini AI generates 5 unique certificate designs
+- Each design includes colors, style, and Canvas.js code
+
+### 3. Canvas Rendering
+- Canvas.js renders high-quality certificates (1200x850px)
+- 5 distinct styles with professional color schemes
+- Responsive display with full preview
+
+### 4. Export Options
+- Download certificates as PNG files
+- View and copy Canvas.js code
+- Visual feedback for all interactions
+
+## 🎨 Certificate Styles
+
+| Style | Colors | Use Case |
+|-------|--------|----------|
+| **Modern** | Navy Blue + Gold | Corporate training, tech certificates |
+| **Elegant** | Burgundy + Cream | Academic achievements, formal recognition |
+| **Creative** | Teal + Purple | Design courses, creative workshops |
+| **Professional** | Charcoal + Silver | Professional certifications, compliance |
+| **Minimalist** | Forest Green + White | Clean, modern certificates |
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -107,17 +154,6 @@ Each certificate is rendered using HTML5 Canvas with:
 - **Next.js 15** - React framework
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
-- **Canvas API** - Certificate rendering
 - **Google Gemini AI** - AI-powered design generation
 - **Lucide React** - Icons
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
