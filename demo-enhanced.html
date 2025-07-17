@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CertifyAI - Enhanced Certificate Generator Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #60a5fa, #a855f7, #ec4899);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(147, 51, 234, 0.5)); }
+            to { filter: drop-shadow(0 0 40px rgba(147, 51, 234, 0.8)); }
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(147, 51, 234, 0.3);
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+        }
+
+        .input-group input::placeholder {
+            color: #94a3b8;
+        }
+
+        .generate-btn {
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(147, 51, 234, 0.3);
+            border-top: 4px solid #9333ea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .certificates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .certificate-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .certificate-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(147, 51, 234, 0.2);
+        }
+
+        .card-header {
+            padding: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #f1f5f9;
+        }
+
+        .card-description {
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .style-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #1f2937;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .card-content {
+            padding: 30px;
+        }
+
+        .canvas-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .canvas-container canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-code {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-section {
+            margin-top: 20px;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .code-header {
+            padding: 15px 20px;
+            background: #2d2d2d;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .code-content {
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .code-content pre {
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 60px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+        }
+
+        .footer h3 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3rem;
+            }
+            
+            .input-row {
+                flex-direction: column;
+            }
+            
+            .certificates-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>CertifyAI</h1>
+            <p>Create stunning professional certificates with the power of AI. Generate beautiful designs using Gemini AI and Canvas.js technology.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <span>🤖</span>
+                    <span>AI-Powered</span>
+                </div>
+                <div class="feature">
+                    <span>🎨</span>
+                    <span>Beautiful Designs</span>
+                </div>
+                <div class="feature">
+                    <span>⚡</span>
+                    <span>Instant Generation</span>
+                </div>
+                <div class="feature">
+                    <span>💾</span>
+                    <span>High Quality Export</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="categoryInput">Certificate Category</label>
+                    <input 
+                        type="text" 
+                        id="categoryInput" 
+                        placeholder="e.g., 'AI Software Development Certificate', 'Advanced Programming Bootcamp'"
+                        value="AI Software Development Certificate"
+                    />
+                </div>
+                <button class="generate-btn" onclick="generateCertificates()">
+                    <span>✨</span>
+                    <span>Generate Certificates</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <h2>Creating your certificates...</h2>
+            <p>Our AI is designing 5 unique styles for you</p>
+        </div>
+
+        <!-- Certificates Grid -->
+        <div id="certificatesSection" class="certificates-grid">
+            <!-- Certificates will be generated here -->
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h3>Powered by Gemini AI & Canvas.js</h3>
+            <p>Create, customize, and download professional certificates in seconds</p>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced sample designs with software focus
+        const sampleDesigns = [
+            {
+                id: 1,
+                title: "Tech Gradient Certificate",
+                description: "Modern tech-inspired design with dynamic gradients and clean typography",
+                colors: {
+                    primary: "#1e293b",
+                    secondary: "#3730a3",
+                    accent: "#06b6d4",
+                    text: "#f1f5f9"
+                },
+                style: "modern"
+            },
+            {
+                id: 2,
+                title: "Professional Code Certificate",
+                description: "Clean and authoritative design perfect for software certifications",
+                colors: {
+                    primary: "#0f172a",
+                    secondary: "#1e40af",
+                    accent: "#3b82f6",
+                    text: "#ffffff"
+                },
+                style: "professional"
+            },
+            {
+                id: 3,
+                title: "Creative Developer Certificate",
+                description: "Bold and innovative design for creative coding achievements",
+                colors: {
+                    primary: "#7c3aed",
+                    secondary: "#a855f7",
+                    accent: "#06d6a0",
+                    text: "#ffffff"
+                },
+                style: "creative"
+            },
+            {
+                id: 4,
+                title: "Elegant Software Certificate",
+                description: "Sophisticated design with refined typography for distinguished achievements",
+                colors: {
+                    primary: "#f8fafc",
+                    secondary: "#1e293b",
+                    accent: "#dc2626",
+                    text: "#1f2937"
+                },
+                style: "elegant"
+            },
+            {
+                id: 5,
+                title: "Minimalist Code Certificate",
+                description: "Clean and focused design emphasizing simplicity and clarity",
+                colors: {
+                    primary: "#ffffff",
+                    secondary: "#f8fafc",
+                    accent: "#6366f1",
+                    text: "#1f2937"
+                },
+                style: "minimalist"
+            }
+        ];
+
+        function generateCertificates() {
+            const category = document.getElementById('categoryInput').value.trim();
+            if (!category) {
+                alert('Please enter a category name');
+                return;
+            }
+
+            showLoading();
+            
+            setTimeout(() => {
+                hideLoading();
+                renderCertificates(sampleDesigns, category);
+            }, 2000);
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('certificatesSection').innerHTML = '';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSection').style.display = 'none';
+        }
+
+        function renderCertificates(designs, category) {
+            const certificatesSection = document.getElementById('certificatesSection');
+            
+            designs.forEach((design, index) => {
+                setTimeout(() => {
+                    const card = createCertificateCard(design, category);
+                    certificatesSection.appendChild(card);
+                    
+                    // Draw certificate after card is added to DOM
+                    setTimeout(() => {
+                        drawCertificate(design, category);
+                    }, 100);
+                }, index * 200); // Staggered animation
+            });
+        }
+
+        function createCertificateCard(design, category) {
+            const card = document.createElement('div');
+            card.className = 'certificate-card';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(50px)';
+            
+            const canvasCode = generateCanvasCode(design, category);
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3 class="card-title">${design.title}</h3>
+                    <p class="card-description">${design.description}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="style-badge">
+                            <span>⭐</span>
+                            <span>${design.style}</span>
+                        </div>
+                        <div class="color-palette">
+                            ${Object.values(design.colors).map(color => 
+                                `<div class="color-swatch" style="background-color: ${color};"></div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="canvas-container">
+                        <canvas id="canvas-${design.id}" width="800" height="600"></canvas>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-download" onclick="downloadCertificate(${design.id})">
+                            💾 Download PNG
+                        </button>
+                        <button class="btn btn-code" onclick="toggleCode(${design.id})">
+                            🔧 View Code
+                        </button>
+                    </div>
+                    <div id="code-${design.id}" class="code-section">
+                        <div class="code-header">
+                            <span style="color: #00ff00; font-family: monospace;">Canvas.js Code</span>
+                            <button onclick="copyCode(${design.id})" style="background: none; border: none; color: #94a3b8; cursor: pointer;">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="code-content">
+                            <pre>${canvasCode}</pre>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Animate card appearance
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 50);
+            
+            return card;
+        }
+
+        function drawCertificate(design, category) {
+            const canvas = document.getElementById(`canvas-${design.id}`);
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            switch(design.style) {
+                case 'modern':
+                    drawModernCertificate(ctx, design, category);
+                    break;
+                case 'elegant':
+                    drawElegantCertificate(ctx, design, category);
+                    break;
+                case 'creative':
+                    drawCreativeCertificate(ctx, design, category);
+                    break;
+                case 'professional':
+                    drawProfessionalCertificate(ctx, design, category);
+                    break;
+                case 'minimalist':
+                    drawMinimalistCertificate(ctx, design, category);
+                    break;
+            }
+        }
+
+        function drawModernCertificate(ctx, design, category) {
+            // Enhanced modern design for software certificates
+            const gradient = ctx.createLinearGradient(0, 0, 800, 600);
+            gradient.addColorStop(0, design.colors.primary);
+            gradient.addColorStop(0.5, design.colors.secondary);
+            gradient.addColorStop(1, design.colors.primary);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Tech pattern overlay
+            ctx.globalAlpha = 0.1;
+            for (let i = 0; i < 10; i++) {
+                ctx.fillStyle = design.colors.accent;
+                ctx.fillRect(i * 80, 0, 2, 600);
+                ctx.fillRect(0, i * 60, 800, 2);
+            }
+            ctx.globalAlpha = 1;
+
+            // Modern border with glow effect
+            ctx.shadowColor = design.colors.accent;
+            ctx.shadowBlur = 15;
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 6;
+            ctx.strokeRect(30, 30, 740, 540);
+            ctx.shadowBlur = 0;
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 52px "Arial", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('CERTIFICATE OF COMPLETION', 400, 120);
+
+            // Tech accent line
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(200, 140);
+            ctx.lineTo(600, 140);
+            ctx.stroke();
+
+            // Category
+            ctx.fillStyle = design.colors.accent;
+            ctx.font = 'bold 34px "Arial", sans-serif';
+            ctx.fillText(category.toUpperCase(), 400, 220);
+
+            // Recipient section
+            ctx.fillStyle = design.colors.text;
+            ctx.font = '24px "Arial", sans-serif';
+            ctx.fillText('This certifies that', 400, 300);
+            
+            ctx.font = 'bold 32px "Arial", sans-serif';
+            ctx.fillText('[DEVELOPER NAME]', 400, 350);
+
+            ctx.font = '20px "Arial", sans-serif';
+            ctx.fillText('has successfully completed all requirements', 400, 400);
+            ctx.fillText('and demonstrated proficiency in software development', 400, 430);
+
+            // Footer with tech elements
+            ctx.font = '16px "Arial", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('Date: ___________', 100, 520);
+            ctx.textAlign = 'right';
+            ctx.fillText('Authorized by: ___________', 700, 520);
+
+            // Code brackets decoration
+            ctx.fillStyle = design.colors.accent;
+            ctx.font = 'bold 40px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('{ }', 50, 300);
+            ctx.textAlign = 'right';
+            ctx.fillText('< />', 750, 300);
+        }
+
+        function drawProfessionalCertificate(ctx, design, category) {
+            // Professional software certification design
+            const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+            gradient.addColorStop(0, design.colors.primary);
+            gradient.addColorStop(1, design.colors.secondary);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Professional header
+            ctx.fillStyle = design.colors.accent;
+            ctx.fillRect(0, 0, 800, 120);
+
+            // Header content
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 36px "Arial", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('PROFESSIONAL SOFTWARE CERTIFICATION', 400, 50);
+            
+            ctx.font = '18px "Arial", sans-serif';
+            ctx.fillText('Awarded by Software Excellence Institute', 400, 80);
+
+            // Main border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 4;
+            ctx.strokeRect(40, 40, 720, 520);
+
+            // Category
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 28px "Arial", sans-serif';
+            ctx.fillText(category, 400, 200);
+
+            // Certification text
+            ctx.font = '22px "Arial", sans-serif';
+            ctx.fillText('This is to certify that', 400, 260);
+            
+            ctx.font = 'bold 26px "Arial", sans-serif';
+            ctx.fillText('[PROFESSIONAL NAME]', 400, 300);
+
+            ctx.font = '18px "Arial", sans-serif';
+            ctx.fillText('has demonstrated expertise and completed', 400, 350);
+            ctx.fillText('all required assessments for this certification', 400, 380);
+
+            // Professional seals
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(150, 450, 40, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.font = '10px "Arial", sans-serif';
+            ctx.fillText('VERIFIED', 150, 450);
+
+            ctx.beginPath();
+            ctx.arc(650, 450, 40, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillText('CERTIFIED', 650, 450);
+
+            // Footer
+            ctx.font = '14px "Arial", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('Certification ID: SW2025-' + Math.random().toString(36).substr(2, 6).toUpperCase(), 80, 520);
+            ctx.textAlign = 'right';
+            ctx.fillText('Valid Until: Dec 2026', 720, 520);
+        }
+
+        function drawCreativeCertificate(ctx, design, category) {
+            // Creative developer certificate
+            const gradient = ctx.createRadialGradient(400, 300, 0, 400, 300, 400);
+            gradient.addColorStop(0, design.colors.primary);
+            gradient.addColorStop(1, design.colors.secondary);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Creative shapes
+            drawCreativeElements(ctx, design.colors);
+
+            // Dynamic border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 6;
+            ctx.setLineDash([15, 10]);
+            ctx.strokeRect(40, 40, 720, 520);
+            ctx.setLineDash([]);
+
+            // Creative title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 44px "Arial", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.save();
+            ctx.transform(1, 0, -0.05, 1, 20, 0);
+            ctx.fillText('CREATIVE DEVELOPER AWARD', 400, 120);
+            ctx.restore();
+
+            // Category with rotation
+            ctx.fillStyle = design.colors.accent;
+            ctx.font = 'bold 30px "Arial", sans-serif';
+            ctx.save();
+            ctx.rotate(-0.02);
+            ctx.fillText(category.toUpperCase(), 420, 200);
+            ctx.restore();
+
+            // Creative content
+            ctx.fillStyle = design.colors.text;
+            ctx.font = '24px "Arial", sans-serif';
+            ctx.fillText('Awarded to an innovative developer', 400, 300);
+            
+            ctx.font = 'bold 28px "Arial", sans-serif';
+            ctx.fillText('[CREATIVE CODER]', 400, 350);
+
+            ctx.font = '20px "Arial", sans-serif';
+            ctx.fillText('For exceptional creativity in software development', 400, 400);
+            ctx.fillText('and pushing the boundaries of innovation', 400, 430);
+
+            // Creative signature
+            ctx.font = '16px "Arial", sans-serif';
+            ctx.fillText('Signed with digital ink ✨', 400, 500);
+        }
+
+        function drawElegantCertificate(ctx, design, category) {
+            // Elegant software certificate
+            ctx.fillStyle = design.colors.primary;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Elegant border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 8;
+            ctx.strokeRect(60, 60, 680, 480);
+
+            ctx.strokeStyle = design.colors.secondary;
+            ctx.lineWidth = 4;
+            ctx.strokeRect(80, 80, 640, 440);
+
+            // Elegant flourishes
+            drawElegantFlourishes(ctx, design.colors.accent);
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'italic 40px "Times New Roman", serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Certificate of Software Excellence', 400, 150);
+
+            // Decorative line
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(250, 170);
+            ctx.lineTo(550, 170);
+            ctx.stroke();
+
+            // Category
+            ctx.fillStyle = design.colors.accent;
+            ctx.font = 'bold 26px "Times New Roman", serif';
+            ctx.fillText(category, 400, 230);
+
+            // Elegant text
+            ctx.fillStyle = design.colors.text;
+            ctx.font = '20px "Times New Roman", serif';
+            ctx.fillText('is hereby presented to', 400, 290);
+            
+            ctx.font = 'italic bold 24px "Times New Roman", serif';
+            ctx.fillText('[Distinguished Developer]', 400, 330);
+
+            ctx.font = '18px "Times New Roman", serif';
+            ctx.fillText('in recognition of outstanding contribution', 400, 380);
+            ctx.fillText('to the field of software development', 400, 410);
+
+            // Elegant footer
+            ctx.font = '16px "Times New Roman", serif';
+            ctx.fillText('Given this day of excellence in the year 2025', 400, 470);
+        }
+
+        function drawMinimalistCertificate(ctx, design, category) {
+            // Clean minimalist design
+            ctx.fillStyle = design.colors.primary;
+            ctx.fillRect(0, 0, 800, 600);
+
+            // Minimalist accent
+            ctx.fillStyle = design.colors.accent;
+            ctx.fillRect(0, 0, 800, 8);
+            ctx.fillRect(0, 592, 800, 8);
+
+            // Simple border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(100, 100, 600, 400);
+
+            // Clean typography
+            ctx.fillStyle = design.colors.text;
+            ctx.font = '300 32px "Arial", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('CERTIFICATE', 400, 180);
+
+            // Category
+            ctx.font = 'bold 24px "Arial", sans-serif';
+            ctx.fillText(category, 400, 240);
+
+            // Minimal content
+            ctx.font = '18px "Arial", sans-serif';
+            ctx.fillText('Awarded to', 400, 320);
+            
+            ctx.font = 'bold 20px "Arial", sans-serif';
+            ctx.fillText('[Developer Name]', 400, 360);
+
+            ctx.font = '16px "Arial", sans-serif';
+            ctx.fillText('For successful completion and demonstrated skills', 400, 420);
+
+            // Signature line
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(300, 460);
+            ctx.lineTo(500, 460);
+            ctx.stroke();
+        }
+
+        // Helper functions
+        function drawCreativeElements(ctx, colors) {
+            // Code symbols and creative shapes
+            const elements = [
+                { type: 'circle', x: 120, y: 150, size: 30, color: colors.accent },
+                { type: 'square', x: 680, y: 450, size: 25, color: colors.secondary },
+                { type: 'triangle', x: 700, y: 150, size: 20, color: colors.accent },
+                { type: 'code', x: 100, y: 450, text: '</>', color: colors.secondary }
+            ];
+
+            elements.forEach(el => {
+                ctx.fillStyle = el.color;
+                ctx.globalAlpha = 0.7;
+                
+                if (el.type === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(el.x, el.y, el.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (el.type === 'square') {
+                    ctx.fillRect(el.x - el.size/2, el.y - el.size/2, el.size, el.size);
+                } else if (el.type === 'triangle') {
+                    ctx.beginPath();
+                    ctx.moveTo(el.x, el.y - el.size);
+                    ctx.lineTo(el.x - el.size, el.y + el.size);
+                    ctx.lineTo(el.x + el.size, el.y + el.size);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (el.type === 'code') {
+                    ctx.font = 'bold 20px monospace';
+                    ctx.fillText(el.text, el.x, el.y);
+                }
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function drawElegantFlourishes(ctx, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            
+            // Corner flourishes
+            const corners = [
+                { x: 100, y: 100 },
+                { x: 700, y: 100 },
+                { x: 100, y: 500 },
+                { x: 700, y: 500 }
+            ];
+
+            corners.forEach(corner => {
+                ctx.beginPath();
+                ctx.moveTo(corner.x - 20, corner.y);
+                ctx.lineTo(corner.x, corner.y);
+                ctx.lineTo(corner.x, corner.y - 20);
+                ctx.stroke();
+            });
+        }
+
+        function generateCanvasCode(design, category) {
+            return `// ${design.title} - Enhanced Canvas.js Implementation
+const canvas = document.getElementById('certificateCanvas');
+const ctx = canvas.getContext('2d');
+
+// High DPI support
+const dpr = window.devicePixelRatio || 1;
+canvas.width = 800 * dpr;
+canvas.height = 600 * dpr;
+ctx.scale(dpr, dpr);
+canvas.style.width = '800px';
+canvas.style.height = '600px';
+
+// Color scheme
+const colors = {
+  primary: '${design.colors.primary}',
+  secondary: '${design.colors.secondary}',
+  accent: '${design.colors.accent}',
+  text: '${design.colors.text}'
+};
+
+// Enhanced ${design.style} certificate for software development
+function draw${design.style.charAt(0).toUpperCase() + design.style.slice(1)}Certificate() {
+  // Clear and setup
+  ctx.clearRect(0, 0, 800, 600);
+  
+  // Background with gradient
+  const gradient = ctx.createLinearGradient(0, 0, 800, 600);
+  gradient.addColorStop(0, colors.primary);
+  gradient.addColorStop(1, colors.secondary);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 800, 600);
+  
+  // Enhanced border with shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.3)';
+  ctx.shadowBlur = 10;
+  ctx.strokeStyle = colors.accent;
+  ctx.lineWidth = 6;
+  ctx.strokeRect(40, 40, 720, 520);
+  ctx.shadowBlur = 0;
+  
+  // Title with enhanced typography
+  ctx.fillStyle = colors.text;
+  ctx.font = 'bold 48px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('CERTIFICATE OF COMPLETION', 400, 120);
+  
+  // Category
+  ctx.fillStyle = colors.accent;
+  ctx.font = 'bold 32px Arial, sans-serif';
+  ctx.fillText('${category}', 400, 200);
+  
+  // Content
+  ctx.fillStyle = colors.text;
+  ctx.font = '24px Arial, sans-serif';
+  ctx.fillText('This certifies that', 400, 280);
+  
+  ctx.font = 'bold 28px Arial, sans-serif';
+  ctx.fillText('[RECIPIENT NAME]', 400, 320);
+  
+  ctx.font = '20px Arial, sans-serif';
+  ctx.fillText('has successfully completed all requirements', 400, 380);
+  
+  // Footer
+  ctx.font = '16px Arial, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Date: ___________', 100, 480);
+  ctx.textAlign = 'right';
+  ctx.fillText('Authorized: ___________', 700, 480);
+}
+
+// Generate the certificate
+draw${design.style.charAt(0).toUpperCase() + design.style.slice(1)}Certificate();
+
+// Download function
+function downloadCertificate() {
+  const link = document.createElement('a');
+  link.download = 'software-certificate.png';
+  link.href = canvas.toDataURL('image/png', 1.0);
+  link.click();
+}`;
+        }
+
+        function downloadCertificate(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const link = document.createElement('a');
+            link.download = `software-certificate-${id}-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        }
+
+        function toggleCode(id) {
+            const codeSection = document.getElementById(`code-${id}`);
+            if (codeSection.style.display === 'none' || codeSection.style.display === '') {
+                codeSection.style.display = 'block';
+            } else {
+                codeSection.style.display = 'none';
+            }
+        }
+
+        function copyCode(id) {
+            const codeContent = document.querySelector(`#code-${id} pre`).textContent;
+            navigator.clipboard.writeText(codeContent).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        }
+
+        // Auto-generate on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                generateCertificates();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

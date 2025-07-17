@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Generator Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .input-section input {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        .input-section button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .input-section button:hover {
+            background-color: #0056b3;
+        }
+        .certificates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .certificate-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: white;
+        }
+        .certificate-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .certificate-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-download {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-code {
+            background-color: #6c757d;
+            color: white;
+        }
+        .code-section {
+            margin-top: 15px;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Certificate Generator</h1>
+            <p>Generate beautiful certificates using Canvas.js and Gemini AI</p>
+        </div>
+        
+        <div class="input-section">
+            <input type="text" id="categoryInput" placeholder="Enter category name (e.g., 'Summer Code Camp Certificate')" />
+            <button onclick="generateCertificates()">Generate Certificates</button>
+        </div>
+        
+        <div id="loadingSection" class="loading" style="display: none;">
+            <p>🔄 Generating certificates...</p>
+        </div>
+        
+        <div id="certificatesSection" class="certificates-grid">
+            <!-- Certificates will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        // Sample certificate designs (fallback data)
+        const sampleDesigns = [
+            {
+                id: 1,
+                title: "Modern Gradient Certificate",
+                description: "A contemporary design with smooth gradients and clean typography",
+                colors: {
+                    primary: "#667eea",
+                    secondary: "#764ba2",
+                    accent: "#f093fb",
+                    text: "#ffffff"
+                },
+                style: "modern"
+            },
+            {
+                id: 2,
+                title: "Elegant Serif Certificate",
+                description: "Classic and sophisticated design with ornate details",
+                colors: {
+                    primary: "#f7f1e8",
+                    secondary: "#d4af37",
+                    accent: "#8b4513",
+                    text: "#2c1810"
+                },
+                style: "elegant"
+            },
+            {
+                id: 3,
+                title: "Creative Artistic Certificate",
+                description: "Bold and colorful design with artistic elements",
+                colors: {
+                    primary: "#ff6b6b",
+                    secondary: "#4ecdc4",
+                    accent: "#45b7d1",
+                    text: "#ffffff"
+                },
+                style: "creative"
+            },
+            {
+                id: 4,
+                title: "Professional Business Certificate",
+                description: "Clean and authoritative design for formal recognition",
+                colors: {
+                    primary: "#2c3e50",
+                    secondary: "#34495e",
+                    accent: "#3498db",
+                    text: "#ffffff"
+                },
+                style: "professional"
+            },
+            {
+                id: 5,
+                title: "Minimalist Clean Certificate",
+                description: "Simple and elegant design focusing on content",
+                colors: {
+                    primary: "#ffffff",
+                    secondary: "#f8f9fa",
+                    accent: "#6c757d",
+                    text: "#212529"
+                },
+                style: "minimalist"
+            }
+        ];
+
+        function generateCertificates() {
+            const category = document.getElementById('categoryInput').value.trim();
+            if (!category) {
+                alert('Please enter a category name');
+                return;
+            }
+
+            const loadingSection = document.getElementById('loadingSection');
+            const certificatesSection = document.getElementById('certificatesSection');
+            
+            loadingSection.style.display = 'block';
+            certificatesSection.innerHTML = '';
+
+            // Simulate API call delay
+            setTimeout(() => {
+                loadingSection.style.display = 'none';
+                renderCertificates(sampleDesigns, category);
+            }, 1500);
+        }
+
+        function renderCertificates(designs, category) {
+            const certificatesSection = document.getElementById('certificatesSection');
+            
+            designs.forEach(design => {
+                const card = document.createElement('div');
+                card.className = 'certificate-card';
+                
+                const canvasCode = generateCanvasCode(design, category);
+                
+                card.innerHTML = `
+                    <div class="certificate-title">${design.title}</div>
+                    <div class="certificate-description">${design.description}</div>
+                    <canvas id="canvas-${design.id}" width="400" height="300"></canvas>
+                    <div class="buttons">
+                        <button class="btn btn-download" onclick="downloadCertificate(${design.id})">
+                            💾 Download
+                        </button>
+                        <button class="btn btn-code" onclick="toggleCode(${design.id})">
+                            🔧 Show Code
+                        </button>
+                    </div>
+                    <div id="code-${design.id}" class="code-section">
+                        <pre>${canvasCode}</pre>
+                    </div>
+                `;
+                
+                certificatesSection.appendChild(card);
+                
+                // Draw certificate after a short delay
+                setTimeout(() => {
+                    drawCertificate(design, category);
+                }, 100);
+            });
+        }
+
+        function drawCertificate(design, category) {
+            const canvas = document.getElementById(`canvas-${design.id}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw based on style
+            switch(design.style) {
+                case 'modern':
+                    drawModernCertificate(ctx, design, category);
+                    break;
+                case 'elegant':
+                    drawElegantCertificate(ctx, design, category);
+                    break;
+                case 'creative':
+                    drawCreativeCertificate(ctx, design, category);
+                    break;
+                case 'professional':
+                    drawProfessionalCertificate(ctx, design, category);
+                    break;
+                case 'minimalist':
+                    drawMinimalistCertificate(ctx, design, category);
+                    break;
+            }
+        }
+
+        function drawModernCertificate(ctx, design, category) {
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 400, 300);
+            gradient.addColorStop(0, design.colors.primary);
+            gradient.addColorStop(1, design.colors.secondary);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 300);
+
+            // Border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(10, 10, 380, 280);
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('CERTIFICATE', 200, 50);
+            
+            ctx.font = '12px Arial';
+            ctx.fillText('OF ACHIEVEMENT', 200, 70);
+
+            // Category
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(category, 200, 120);
+
+            // Recipient
+            ctx.font = '14px Arial';
+            ctx.fillText('This is to certify that', 200, 160);
+            ctx.fillText('[Recipient Name]', 200, 180);
+            ctx.fillText('has successfully completed', 200, 200);
+
+            // Footer
+            ctx.font = '10px Arial';
+            ctx.fillText('Date: _______', 100, 250);
+            ctx.fillText('Signature: _______', 300, 250);
+        }
+
+        function drawElegantCertificate(ctx, design, category) {
+            // Background
+            ctx.fillStyle = design.colors.primary;
+            ctx.fillRect(0, 0, 400, 300);
+
+            // Border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(15, 15, 370, 270);
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'italic 20px serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Certificate of Excellence', 200, 50);
+
+            // Category
+            ctx.font = 'bold 16px serif';
+            ctx.fillText(category, 200, 100);
+
+            // Recipient
+            ctx.font = '12px serif';
+            ctx.fillText('Presented to', 200, 140);
+            ctx.font = 'italic bold 14px serif';
+            ctx.fillText('[Recipient Name]', 200, 160);
+            ctx.font = '10px serif';
+            ctx.fillText('For outstanding achievement', 200, 180);
+        }
+
+        function drawCreativeCertificate(ctx, design, category) {
+            // Background
+            ctx.fillStyle = design.colors.primary;
+            ctx.fillRect(0, 0, 400, 300);
+
+            // Creative shapes
+            ctx.fillStyle = design.colors.secondary;
+            ctx.beginPath();
+            ctx.arc(50, 50, 15, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = design.colors.accent;
+            ctx.beginPath();
+            ctx.arc(350, 250, 12, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(12, 12, 376, 276);
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('CREATIVE ACHIEVEMENT', 200, 50);
+
+            // Category
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(category, 200, 100);
+
+            // Recipient
+            ctx.font = '12px Arial';
+            ctx.fillText('Awarded to', 200, 140);
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('[Recipient Name]', 200, 160);
+        }
+
+        function drawProfessionalCertificate(ctx, design, category) {
+            // Background
+            ctx.fillStyle = design.colors.primary;
+            ctx.fillRect(0, 0, 400, 300);
+
+            // Header
+            ctx.fillStyle = design.colors.secondary;
+            ctx.fillRect(20, 20, 360, 40);
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('PROFESSIONAL CERTIFICATE', 200, 45);
+
+            // Category
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(category, 200, 100);
+
+            // Recipient
+            ctx.font = '12px Arial';
+            ctx.fillText('This certifies that', 200, 140);
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('[Recipient Name]', 200, 160);
+            ctx.font = '10px Arial';
+            ctx.fillText('has successfully completed the requirements', 200, 180);
+        }
+
+        function drawMinimalistCertificate(ctx, design, category) {
+            // Background
+            ctx.fillStyle = design.colors.primary;
+            ctx.fillRect(0, 0, 400, 300);
+
+            // Simple border
+            ctx.strokeStyle = design.colors.accent;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(30, 30, 340, 240);
+
+            // Title
+            ctx.fillStyle = design.colors.text;
+            ctx.font = '18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('CERTIFICATE', 200, 80);
+
+            // Category
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(category, 200, 120);
+
+            // Recipient
+            ctx.font = '10px Arial';
+            ctx.fillText('Awarded to', 200, 160);
+            ctx.font = 'bold 12px Arial';
+            ctx.fillText('[Recipient Name]', 200, 180);
+        }
+
+        function generateCanvasCode(design, category) {
+            return `// ${design.title} - Canvas.js Implementation
+const canvas = document.getElementById('certificateCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set canvas dimensions
+canvas.width = 800;
+canvas.height = 600;
+
+// Color scheme
+const colors = {
+  primary: '${design.colors.primary}',
+  secondary: '${design.colors.secondary}',
+  accent: '${design.colors.accent}',
+  text: '${design.colors.text}'
+};
+
+// ${design.style.charAt(0).toUpperCase() + design.style.slice(1)} Certificate
+function draw${design.style.charAt(0).toUpperCase() + design.style.slice(1)}Certificate(ctx, colors, category) {
+  // Background
+  ctx.fillStyle = colors.primary;
+  ctx.fillRect(0, 0, 800, 600);
+  
+  // Border
+  ctx.strokeStyle = colors.accent;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(20, 20, 760, 560);
+  
+  // Certificate text
+  ctx.fillStyle = colors.text;
+  ctx.font = 'bold 48px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('CERTIFICATE', 400, 120);
+  
+  ctx.font = '36px Arial';
+  ctx.fillText(category, 400, 250);
+  
+  ctx.font = '28px Arial';
+  ctx.fillText('[Recipient Name]', 400, 350);
+}
+
+// Call the function
+draw${design.style.charAt(0).toUpperCase() + design.style.slice(1)}Certificate(ctx, colors, '${category}');
+
+// Download function
+function downloadCertificate() {
+  const link = document.createElement('a');
+  link.download = 'certificate.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}`;
+        }
+
+        function downloadCertificate(id) {
+            const canvas = document.getElementById(`canvas-${id}`);
+            const link = document.createElement('a');
+            link.download = `certificate-${id}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function toggleCode(id) {
+            const codeSection = document.getElementById(`code-${id}`);
+            if (codeSection.style.display === 'none' || codeSection.style.display === '') {
+                codeSection.style.display = 'block';
+            } else {
+                codeSection.style.display = 'none';
+            }
+        }
+
+        // Initialize with a sample
+        window.onload = function() {
+            document.getElementById('categoryInput').value = 'Summer Code Camp Certificate';
+        };
+    </script>
+</body>
+</html>

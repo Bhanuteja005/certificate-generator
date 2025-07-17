@@ -27,7 +27,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <CertificateGenerator onGenerate={handleGenerate} />
     </div>
   );
