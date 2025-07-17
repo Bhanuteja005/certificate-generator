@@ -28,6 +28,7 @@ export default function CertificateGenerator({ onGenerate }: CertificateGenerato
   const [designs, setDesigns] = useState<CertificateDesign[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showCode, setShowCode] = useState<{ [key: number]: boolean }>({});
+  const [copiedStates, setCopiedStates] = useState<{ [key: number]: boolean }>({});
   const canvasRefs = useRef<{ [key: number]: HTMLCanvasElement | null }>({});
   
   const { scrollYProgress } = useScroll();
@@ -816,6 +817,36 @@ export default function CertificateGenerator({ onGenerate }: CertificateGenerato
     }));
   };
 
+  const copyCode = async (designId: number, code: string) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedStates(prev => ({ ...prev, [designId]: true }));
+      
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedStates(prev => ({ ...prev, [designId]: false }));
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy code:', error);
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = code;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopiedStates(prev => ({ ...prev, [designId]: true }));
+        setTimeout(() => {
+          setCopiedStates(prev => ({ ...prev, [designId]: false }));
+        }, 2000);
+      } catch (fallbackError) {
+        console.error('Fallback copy failed:', fallbackError);
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-blue-100 relative overflow-hidden">
       {/* Animated background elements */}
@@ -1078,10 +1109,14 @@ export default function CertificateGenerator({ onGenerate }: CertificateGenerato
                                 <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800">
                                   <span className="text-green-400 font-mono text-sm">Canvas.js Code</span>
                                   <button
-                                    onClick={() => navigator.clipboard.writeText(design.canvasCode)}
-                                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                                    onClick={() => copyCode(design.id, design.canvasCode)}
+                                    className={`text-sm transition-all duration-200 px-3 py-1 rounded ${
+                                      copiedStates[design.id] 
+                                        ? 'bg-green-600 text-white' 
+                                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                                    }`}
                                   >
-                                    Copy Code
+                                    {copiedStates[design.id] ? '✓ Copied!' : 'Copy Code'}
                                   </button>
                                 </div>
                                 <pre className="p-4 text-sm text-green-400 overflow-x-auto max-h-96">
